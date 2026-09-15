@@ -1,5 +1,7 @@
 #include <iostream>
 #include "Components.hpp"
+// #include "EntityManager.hpp"  // not required as compiler concats files
+// this is imported in EntityManager
 
 using ComponentTuple = std::tuple<CTransform,
                                   CCollision,
@@ -16,9 +18,14 @@ class Entity
         bool              m_alive      = true;
         int               m_id         = 0;
         std::string       m_tag        = "default";
-    public:
+        
         // constructor
         Entity(){}
+        Entity(std::string tag, size_t id)
+        :m_tag(tag),
+         m_id(id)
+        {}
+    public:
 
         // component functions
         template <typename T>
@@ -37,6 +44,8 @@ class Entity
         std::string   getTag();
         void          setTag(std::string tag);
         void          destroy();
+
+        friend class EntityManager;
 };
 
 
@@ -95,7 +104,6 @@ void Entity::setTag(std::string tag)
 
 void Entity::destroy()
 {
-    *this = Entity();
     m_alive = false;
     return;
 }
