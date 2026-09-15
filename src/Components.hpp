@@ -11,7 +11,7 @@ class Components
 
 
 // kinematics
-class CTransform : Components
+class CTransform : public Components
 {
     public:
         vec2  position;
@@ -22,7 +22,7 @@ class CTransform : Components
 };
 
 
-class CCollision : Components
+class CCollision : public Components
 {
     public:
         float radius;
@@ -33,7 +33,7 @@ class CCollision : Components
 };
 
 
-class CScore : Components
+class CScore : public Components
 {
     public:
         int score;
@@ -41,7 +41,7 @@ class CScore : Components
         CScore(){}
 };
 
-class CShape : Components
+class CShape : public Components
 {
     public:
         sf::CircleShape shape;
@@ -54,7 +54,7 @@ class CShape : Components
         }
 };
 
-class CLifeSpan
+class CLifeSpan : public Components
 {
     public:
         float lifeSpan;
@@ -67,7 +67,7 @@ class CLifeSpan
             {}
 };
 
-class CInput : Components
+class CInput : public Components
 {
     public:
         int up;
@@ -77,4 +77,8 @@ class CInput : Components
         int shoot;
 };
 
-class 
+class CSpecialAbility : public Components
+{
+    public:
+        CSpecialAbility(){}
+};
