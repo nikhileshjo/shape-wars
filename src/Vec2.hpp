@@ -17,10 +17,13 @@ class vec2
         {}
         
         // functions
-        void    printVec();
+        void    print();
         vec2    operator+ (vec2 v);
+        void    operator+= (vec2 v);
         vec2    operator- (vec2 v);
+        void    operator-= (vec2 v);
         vec2    operator* (float scalar);
+        void    operator*= (float scalar);
         float   mag();
         vec2    normalize();
 
@@ -28,7 +31,7 @@ class vec2
 
 
 // function definitions
-void vec2::printVec()
+void vec2::print()
 {
     std::cout << x << "i + " << y << "j" <<std::endl;
     return;
@@ -43,6 +46,13 @@ vec2 vec2::operator+(vec2 v)
 
 }
 
+void vec2::operator+=(vec2 v)
+{
+    x += v.x;
+    y += v.y;
+    return;
+}
+
 vec2 vec2::operator-(vec2 v)
 {
     float res_x = x - v.x;
@@ -51,12 +61,26 @@ vec2 vec2::operator-(vec2 v)
     return vec2(res_x, res_y);
 }
 
+void vec2::operator-=(vec2 v)
+{
+    x -= v.x;
+    y -= v.y;
+    return;
+}
+
 vec2 vec2::operator* (float scalar)
 {
     float res_x = x * scalar;
     float res_y = y * scalar;
 
     return vec2(res_x, res_y);
+}
+
+void vec2::operator*=(float scalar)
+{
+    x *= scalar;
+    y *= scalar;
+    return;
 }
 
 float vec2::mag()
