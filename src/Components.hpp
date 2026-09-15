@@ -1,12 +1,3 @@
-// list of components
-// CTransform
-// CCollision
-// CScore
-// CShape
-// CLifeSpan
-// CInput
-// CSpecialAbility
-// CDebugger: This is my own design, I was thinking if imgui is just a debugging tool that helps
 #include "Vec2.hpp"
 #include <SFML/Graphics/CircleShape.hpp>
 
@@ -23,8 +14,9 @@ class Components
 class CTransform : Components
 {
     public:
-        vec2 position;
-        vec2 velocity;    
+        vec2  position;
+        vec2  velocity;
+        float angle;    
     
         CTransform(){}
 };
@@ -84,3 +76,5 @@ class CInput : Components
         int right;
         int shoot;
 };
+
+class 
