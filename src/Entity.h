@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include "Components.hpp"
 // #include "EntityManager.hpp"  // not required as compiler concats files
@@ -48,7 +49,6 @@ class Entity
         friend class EntityManager;
 };
 
-
 template <typename T>
 T& Entity::get()
 {
@@ -72,38 +72,5 @@ template <typename T>
 void Entity::remove()
 {
     std::get<T>(m_components).exists = false;
-    return;
-}
-
-int Entity::getId()
-{
-    return m_id;
-}
-
-void Entity::setId(int id)
-{
-    m_id = id;
-    return;
-}
-
-bool Entity::isAlive()
-{
-    return m_alive;
-}
-
-std::string Entity::getTag()
-{
-    return m_tag;
-}
-
-void Entity::setTag(std::string tag)
-{
-    m_tag = tag;
-    return;
-}
-
-void Entity::destroy()
-{
-    m_alive = false;
     return;
 }

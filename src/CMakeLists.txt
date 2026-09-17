@@ -1,6 +1,14 @@
 add_executable(start_game
-    main.cpp 
-    Vec2.hpp
+    main.cpp
+    Game.h
+    Game.cpp
+    EntityManager.h
+    EntityManager.cpp
+    Entity.h
+    Entity.cpp
+    Components.hpp
+    Vec2.h
+    Vec2.cpp
     )
 
 target_include_directories(start_game PRIVATE
