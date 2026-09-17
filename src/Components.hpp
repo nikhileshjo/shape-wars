@@ -71,11 +71,11 @@ class CLifeSpan : public Components
 class CInput : public Components
 {
     public:
-        int up;
-        int down;
-        int left;
-        int right;
-        int shoot;
+        bool up    = false;
+        bool down  = false;
+        bool left  = false;
+        bool right = false;
+        bool shoot = false;
 };
 
 class CSpecialAbility : public Components
