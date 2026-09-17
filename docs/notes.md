@@ -3,3 +3,44 @@
 - The game loop always requires you to take inputs i.e. you need to run `m_window.pollEvent()` in everyframe whether you require input or not at that time. Failing to do so would mean the game window isn't draining the event window, from the OS's perspective it ignores all inputs from the OS, meaning, it's stopped responding and will prompt you to force close or wait for the window to become responsive. How do I know this? While testing, I just needed to print my shape on the screen, so I didn't use `pollEvent()` and my window would crash all the time with no failures to investigate.
 - We can update shape.setPosition() in `sRender()` or in `sMovement()`, but we choose to do it in `sRender()` that way, `sMovement()` doesn't concern itself with any rendering logic and we have now decoupled it compeletely.
 - How to handle object types with no default constructors? I had issues declaring sf::Text as it doesn't have a default constructor, so I can't do `sf::Text m_text;`, I need it to be accessible to other members of the class to in the GameEngine class. So we can use std::optional, this allows us to declear a variable that doesn't have a default constructor and also we can intialize it later. Syntax: `std::optional<sf::Text> m_text;` the rest is the same as any other variable then we can use it later as `m_text.emplace(m_font, "", m_textConfig.size);`
+- Had an issue with my sMovement function. All my flag checks were an individual if, so what this did was, within the same frame, more than one if would get executed for x or y coordinate, since "down" checks where after the "up" checks, it would see that "down" is set to false and set the y back to 0 right after the "up" check set it to true in case you pressed up, same for left and right. Below is the faulty code. Let's see what happens when you press up.
+```
+    if ( p->get<CInput>().up)  // this becomes true and velocity y is set to -1
+    {
+        pVel.y = (-1);
+    }
+    if (!p->get<CInput>().up)
+    {
+        pVel.y = 0;
+    }
+
+    if ( p->get<CInput>().down )
+    {
+        pVel.y = 1;
+    }
+    if (!p->get<CInput>().down) // in the same frame this too is true so, it sets y back to 0
+    {
+        pVel.y = 0;
+    }
+    if ( p->get<CInput>().left )
+    {
+        pVel.x = (-1);
+    }
+    if (!p->get<CInput>().left)
+    {
+        pVel.x = 0;
+    }
+
+    if ( p->get<CInput>().right )
+    {
+        pVel.x = 1;
+    }
+    if (!p->get<CInput>().right)
+    {
+        pVel.x = 0;
+    }
+```
+1. As you might have noticed, from above, it doesn't let the entity go left or up in this case.\
+2. How do we resolve this? We make x changing if statements as one if-else block and y changing statement as one if-else block, that way, if anything changes the state of x in the frame, we ensure that in the same frame it doesn't get overwritten by another x editing statment, same goes for y.\
+3. Why not put it all in one if-else block? Because if we did, we'll lose diagonal directions for one frame. At a time only one of the if-else block would get activated, so there will be an input delay if 2 dirction keys were pushed.
+4. Order matters: We will prioritise key press over key release, so our if-else would have first 2 conditions that check for a up or down/left or right being true, if they are, they'll be execute, else we'll stop moving. This creates a small issue, though. We always prioritize one side over other, like in my implementation, we prioritize up over down/ left over right, if both up and down are pressed, regardless of the order of pressing, we'll always choose up.
