@@ -118,12 +118,6 @@ void GameEngine::spawnPlayer()
     p->add<CShape>();
     p->add<CCollision>();
 
-    // set controls
-    // p->get<CInput>().up = std::tolower(m_keybindConfig.up) - 'a';
-    // p->get<CInput>().left = std::tolower(m_keybindConfig.left) - 'a';
-    // p->get<CInput>().down = std::tolower(m_keybindConfig.down) - 'a';
-    // p->get<CInput>().right = std::tolower(m_keybindConfig.right) - 'a';
-
     // set shape
     p->get<CShape>().shape.setPointCount(m_playerConfig.vertices);
     p->get<CShape>().shape.setRadius(m_playerConfig.shapeRadius);
@@ -272,6 +266,47 @@ void GameEngine::sMovement()
     // }
 }
 
+void GameEngine::spawnEnemy()
+{
+    auto e = m_entityManager.addEntity("enemy");
+    e->add<CTransform>();
+    e->add<CShape>();
+    e->add<CCollision>();
+
+    // set shape
+    int vertices = (rand() % ((m_enemyConfig.maxVertices - m_enemyConfig.minVertices) + 1)) + m_enemyConfig.minVertices;
+    float speed = (rand() % ((int)(m_enemyConfig.maxSpeed - m_enemyConfig.minSpeed) + 1)) + m_enemyConfig.maxSpeed;
+    int fillRed = rand() % 256;
+    int fillGreen = rand() % 256;
+    int fillBlue = rand() % 256;
+    e->get<CShape>().shape.setPointCount(vertices);
+    e->get<CShape>().shape.setRadius(m_enemyConfig.shapeRadius);
+    e->get<CShape>().shape.setOrigin({m_enemyConfig.shapeRadius, m_enemyConfig.shapeRadius});
+    e->get<CShape>().shape.setFillColor(sf::Color(fillRed, fillGreen, fillBlue));
+    e->get<CShape>().shape.setOutlineColor(sf::Color(m_enemyConfig.outerRed, m_enemyConfig.outerGreen, m_enemyConfig.outerBlue));
+    e->get<CShape>().shape.setOutlineThickness(m_enemyConfig.outerThickness);
+
+    // set collision radius
+    e->get<CCollision>().radius = m_enemyConfig.collisionRadius;
+    
+    // set intial trasnform
+    int minX = m_enemyConfig.collisionRadius + 1;
+    int maxX = m_window.getSize().x - m_enemyConfig.collisionRadius - 1;
+    float posX = (rand() % (maxX - minX)) + minX;
+
+    int minY = m_enemyConfig.collisionRadius + 1;
+    int maxY = m_window.getSize().y - m_enemyConfig.collisionRadius - 1;
+    float posY = (rand() % (maxY - minY)) + minY;
+    e->get<CTransform>().position = {posX, posY};
+    e->get<CTransform>().velocity = {rand() , rand()};
+    e->get<CTransform>().velocity = e->get<CTransform>().velocity.normalize() * speed;
+
+
+    e = nullptr;
+
+    return;
+}
+
 std::shared_ptr<Entity>& GameEngine::player()
 {
     if (m_entityManager.getEntities("player").size())
@@ -335,6 +370,7 @@ void GameEngine::run()
 
         sUserInput();
         sMovement();
+        spawnEnemy();
         sRender();
     }
     return;

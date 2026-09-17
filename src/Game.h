@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 
 #include "imgui.h"
 #include "imgui-SFML.h"
