@@ -153,7 +153,6 @@ void GameEngine::sUserInput()
         // check for window closing
         if (event ->is<sf::Event::Closed>())
         {
-            std::cout << "Event closed" << std::endl;
             m_window.close();
         }
 
@@ -164,7 +163,6 @@ void GameEngine::sUserInput()
             auto keyPress = int(keyPressed->scancode);
             if (keyPress == std::tolower(m_keybindConfig.up) - 'a')
             {
-                std::cout << "pressed up" << std::endl;
                 p->get<CInput>().up = true;
             }
             if (keyPress == std::tolower(m_keybindConfig.down) - 'a')
@@ -173,7 +171,6 @@ void GameEngine::sUserInput()
             }
             if (keyPress == std::tolower(m_keybindConfig.left) - 'a')
             {
-                std::cout << "pressed left" << std::endl;
                 p->get<CInput>().left = true;
             }
             if (keyPress == std::tolower(m_keybindConfig.right) - 'a')
@@ -225,9 +222,7 @@ void GameEngine::sMovement()
     // setting y direction
     if ( (p->get<CInput>().up) && ((pPos.y - p->get<CCollision>().radius) >= 0))
     {
-        std::cout << "y = up" << std::endl;
         pVel.y = (-1);
-        std::cout << "pVel.y = " << pVel.y << std::endl;
     }
     else if ( p->get<CInput>().down && ((pPos.y + p->get<CCollision>().radius) <= m_window.getSize().y))
     {
@@ -245,9 +240,7 @@ void GameEngine::sMovement()
     // setting x direction
     if ( p->get<CInput>().left && ((pPos.x - p->get<CCollision>().radius) >= 0))
     {
-        std::cout << "x left" << std::endl;
         pVel.x = (-1);
-        std::cout << "pVel.x = " << pVel.x << std::endl;
     }
     else if ( p->get<CInput>().right && ((pPos.x + p->get<CCollision>().radius) <= m_window.getSize().x))
     {
@@ -263,11 +256,6 @@ void GameEngine::sMovement()
     }
 
     // calculate the next position
-    std::cout << "player velocity: ";
-    pVel.print();
-
-    std::cout << "player position: ";
-    pPos.print();
     pPos += (pVel.normalize() * m_playerConfig.speed);
     
 
