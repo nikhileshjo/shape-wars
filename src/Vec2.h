@@ -25,7 +25,7 @@ class vec2
         void    operator-= (vec2 v);
         vec2    operator* (float scalar);
         void    operator*= (float scalar);
-        float   mag();
-        vec2    normalize();
+        float   mag() const;
+        vec2    normalize() const;
 
 };

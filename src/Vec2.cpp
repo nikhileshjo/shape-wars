@@ -54,13 +54,13 @@ void vec2::operator*=(float scalar)
     return;
 }
 
-float vec2::mag()
+float vec2::mag() const
 {
     float magnitude = std::sqrt((x*x) + (y*y));
     return magnitude;
 }
 
-vec2 vec2::normalize()
+vec2 vec2::normalize() const
 {
     float magnitude = this->mag();
     if (magnitude == 0)

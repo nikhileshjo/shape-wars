@@ -446,6 +446,43 @@ void GameEngine::sRender()
     m_window.display();
 }
 
+void GameEngine::spawnBullet(std::shared_ptr<Entity> entity, const vec2& mousePos)
+{
+    if ( entity->has<CTransform>() )
+    {
+        auto b = m_entityManager.addEntity("bullet");
+
+        //bullet setup
+        b->add<CTransform>();
+        b->add<CShape>();
+        b->add<CCollision>();
+        b->add<CLifeSpan>();
+
+        // set bullet postion
+        b->get<CTransform>().position = entity->get<CTransform>().position;
+
+        // set bullet velocity
+        b->get<CTransform>().velocity = (mousePos.normalize() * m_bulletConfig.speed);
+
+        // set shape
+        b->get<CShape>().shape.setRadius(m_bulletConfig.shapeRadius);
+        b->get<CShape>().shape.setFillColor(sf::Color(m_bulletConfig.fillRed, m_bulletConfig.fillGreen, m_bulletConfig.fillBlue));
+        b->get<CShape>().shape.setOutlineColor(sf::Color(m_bulletConfig.outerRed, m_bulletConfig.outerGreen, m_bulletConfig.outerBlue));
+        b->get<CShape>().shape.setOutlineThickness(m_bulletConfig.outerThickness);
+        b->get<CShape>().shape.setPointCount(m_bulletConfig.vertices);
+        b->get<CShape>().shape.setOrigin(b->get<CShape>().shape.getGeometricCenter());
+
+        // set life span
+        b->get<CLifeSpan>().lifeSpan = m_bulletConfig.lifeSpan;
+        b->get<CLifeSpan>().remaining = m_bulletConfig.lifeSpan;
+
+        // set collision radius
+        b->get<CCollision>().radius = m_bulletConfig.collisionRadius;
+
+        b = nullptr;
+    }
+}
+
 void GameEngine::run()
 {
     // m_window.create(sf::VideoMode({1280, 740}), "Shape wars", sf::State::Fullscreen);
@@ -485,6 +522,7 @@ void GameEngine::run()
         sMovement();
         sEnemySpawner();
         sCollision();
+        spawnBullet(player(), vec2(340, 260));
         // ImGui::SFML::Init(m_window);
         // // sDebugger();
         // ImGui::SFML::Shutdown();
