@@ -343,9 +343,6 @@ void GameEngine::spawnEnemy()
 
 void GameEngine::sEnemySpawner()
 {
-    std::cout << "Current Frame:" << m_currentFrame << std::endl;
-    std::cout << "spawn interval:" << m_enemyConfig.spawnInterval << std::endl;
-    std::cout << "Frame rate:" << m_windowConfig.frameLimit << std::endl;
     if ( m_currentFrame <= 0)
     {
         spawnEnemy();
@@ -389,6 +386,32 @@ void GameEngine::sDebugger()
     ImGui::End();
     ImGui::SFML::Render(m_window);
     // ImGui::SFML::Shutdown(); // testing
+}
+
+void GameEngine::sCollision()
+{
+    // enemy-player collision
+    auto& p = player();
+    if (p->has<CCollision>() && p->has<CTransform>())
+    {
+        auto& pPos = p->get<CTransform>().position;
+
+        for (auto& e : m_entityManager.getEntities("enemy"))
+        {
+            if (e->has<CCollision>() && e->has<CTransform>())
+            {
+                auto& ePos = e->get<CTransform>().position;
+                float pToEDistSq = std::pow((ePos.x - pPos.x), 2) + std::pow((ePos.y - pPos.y), 2);
+                if ( pToEDistSq <= std::pow(p->get<CCollision>().radius + e->get<CCollision>().radius, 2) )
+                {
+                    // spawn small enemies
+                    e->destroy();
+                    m_score = 0;
+                    spawnPlayer();
+                }
+            }
+        }
+    }
 }
 
 void GameEngine::sRender()
@@ -443,6 +466,7 @@ void GameEngine::run()
         sUserInput();
         sMovement();
         sEnemySpawner();
+        sCollision();
         // ImGui::SFML::Init(m_window);
         // // sDebugger();
         // ImGui::SFML::Shutdown();
