@@ -10,6 +10,7 @@
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/System/Angle.hpp>
 
 #include "EntityManager.h"
 
@@ -95,6 +96,7 @@ class GameEngine
         int                     m_lastEnemySpawnTime = 0;
         bool                    m_paused = false;
         int                     m_scorePerVertex = 100;
+        float                   m_entityRotationRate = 3;
 
     public:
         GameEngine(){}

@@ -361,6 +361,7 @@ void GameEngine::sRender()
     {
         auto& ePos = e->get<CTransform>().position;
         e->get<CShape>().shape.setPosition({ePos.x, ePos.y});
+        e->get<CShape>().shape.rotate(sf::degrees(m_entityRotationRate));
         m_window.draw(e->get<CShape>().shape);
     }
     // add imgui
