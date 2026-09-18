@@ -341,6 +341,21 @@ void GameEngine::spawnEnemy()
     return;
 }
 
+void GameEngine::sEnemySpawner()
+{
+    std::cout << "Current Frame:" << m_currentFrame << std::endl;
+    std::cout << "spawn interval:" << m_enemyConfig.spawnInterval << std::endl;
+    std::cout << "Frame rate:" << m_windowConfig.frameLimit << std::endl;
+    if ( m_currentFrame <= 0)
+    {
+        spawnEnemy();
+        m_currentFrame = (m_windowConfig.frameLimit * m_enemyConfig.spawnInterval);
+        return;
+    }
+    m_currentFrame--;
+    return;    
+}
+
 std::shared_ptr<Entity>& GameEngine::player()
 {
     if (m_entityManager.getEntities("player").size())
@@ -352,6 +367,28 @@ std::shared_ptr<Entity>& GameEngine::player()
         std::cout << "No player created" << std::endl;
         std::exit(1);
     }
+}
+
+void GameEngine::sDebugger()
+{
+    // ImGui::SFML::Init(m_window); // testing
+    // while (const auto event = m_window.pollEvent()) // testing
+    // {
+    //         ImGui::SFML::ProcessEvent(m_window, *event);
+
+    //         if (event->is<sf::Event::Closed>()) {
+    //             m_window.close();
+    //         }
+    // }
+    ImGui::SFML::Update(m_window, m_deltaClock.restart());
+
+    ImGui::ShowDemoWindow();
+
+    ImGui::Begin("Hello, world!");
+    ImGui::Button("Look at this pretty button");
+    ImGui::End();
+    ImGui::SFML::Render(m_window);
+    // ImGui::SFML::Shutdown(); // testing
 }
 
 void GameEngine::sRender()
@@ -405,7 +442,10 @@ void GameEngine::run()
 
         sUserInput();
         sMovement();
-        spawnEnemy();
+        sEnemySpawner();
+        // ImGui::SFML::Init(m_window);
+        // // sDebugger();
+        // ImGui::SFML::Shutdown();
         sRender();
     }
     return;
