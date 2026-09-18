@@ -151,64 +151,66 @@ void GameEngine::sUserInput()
     while (auto event = m_window.pollEvent())
     {
         auto& p = player();
-
-        // check for window closing
-        if (event ->is<sf::Event::Closed>())
+        if (p->has<CInput>())
         {
-            m_window.close();
-        }
 
-        // check for key press        
-        if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
-        {
-            // print the key that was pressed to the console
-            auto keyPress = int(keyPressed->scancode);
-            if (keyPress == std::tolower(m_keybindConfig.up) - 'a')
+            // check for window closing
+            if (event ->is<sf::Event::Closed>())
             {
-                p->get<CInput>().up = true;
+                m_window.close();
             }
-            if (keyPress == std::tolower(m_keybindConfig.down) - 'a')
-            {
-                p->get<CInput>().down = true;
-            }
-            if (keyPress == std::tolower(m_keybindConfig.left) - 'a')
-            {
-                p->get<CInput>().left = true;
-            }
-            if (keyPress == std::tolower(m_keybindConfig.right) - 'a')
-            {
-                p->get<CInput>().right = true;
-            }
-            if (keyPress == std::tolower(m_keybindConfig.pause) - 'a')
-            {
-                m_paused = !m_paused;
-            }
-            
-            
-        }
 
-        // check key release
-        if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>())
-        {
-            auto keyRelease = int(keyReleased->scancode);
-            if (keyRelease == std::tolower(m_keybindConfig.up) - 'a')
+            // check for key press        
+            if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
             {
-                p->get<CInput>().up = false;
+                // print the key that was pressed to the console
+                auto keyPress = int(keyPressed->scancode);
+                if (keyPress == std::tolower(m_keybindConfig.up) - 'a')
+                {
+                    p->get<CInput>().up = true;
+                }
+                if (keyPress == std::tolower(m_keybindConfig.down) - 'a')
+                {
+                    p->get<CInput>().down = true;
+                }
+                if (keyPress == std::tolower(m_keybindConfig.left) - 'a')
+                {
+                    p->get<CInput>().left = true;
+                }
+                if (keyPress == std::tolower(m_keybindConfig.right) - 'a')
+                {
+                    p->get<CInput>().right = true;
+                }
+                if (keyPress == std::tolower(m_keybindConfig.pause) - 'a')
+                {
+                    m_paused = !m_paused;
+                }
+                
+                
             }
-            if (keyRelease == std::tolower(m_keybindConfig.down) - 'a')
+
+            // check key release
+            if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>())
             {
-                p->get<CInput>().down = false;
-            }
-            if (keyRelease == std::tolower(m_keybindConfig.left) - 'a')
-            {
-                p->get<CInput>().left = false;
-            }
-            if (keyRelease == std::tolower(m_keybindConfig.right) - 'a')
-            {
-                p->get<CInput>().right = false;
+                auto keyRelease = int(keyReleased->scancode);
+                if (keyRelease == std::tolower(m_keybindConfig.up) - 'a')
+                {
+                    p->get<CInput>().up = false;
+                }
+                if (keyRelease == std::tolower(m_keybindConfig.down) - 'a')
+                {
+                    p->get<CInput>().down = false;
+                }
+                if (keyRelease == std::tolower(m_keybindConfig.left) - 'a')
+                {
+                    p->get<CInput>().left = false;
+                }
+                if (keyRelease == std::tolower(m_keybindConfig.right) - 'a')
+                {
+                    p->get<CInput>().right = false;
+                }
             }
         }
-        
         // implement mouse press
     }
     return;
@@ -432,6 +434,14 @@ void GameEngine::sRender()
         e->get<CShape>().shape.rotate(sf::degrees(m_entityRotationRate));
         m_window.draw(e->get<CShape>().shape);
     }
+
+    // render score
+    m_text->setString(std::to_string(m_score));
+    m_text->setFillColor(sf::Color(m_textConfig.red, m_textConfig.blue, m_textConfig.green));
+    m_text->setPosition({0,0});
+    m_text->setCharacterSize(m_textConfig.size);
+    m_window.draw(*m_text);
+
     // add imgui
     m_window.display();
 }
