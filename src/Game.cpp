@@ -297,13 +297,13 @@ void GameEngine::sMovement()
 
     // bullet movement
 
-    // for (auto& e : m_entityManager.getEntities())
-    // {
-    //     if (e->has<CTransform>())
-    //     {
-
-    //     }
-    // }
+    for (auto& b : m_entityManager.getEntities("bullet"))
+    {
+        if (b->has<CTransform>())
+        {
+            b->get<CTransform>().position += b->get<CTransform>().velocity;
+        }
+    }
 }
 
 void GameEngine::spawnEnemy()
