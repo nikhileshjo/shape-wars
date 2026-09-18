@@ -210,50 +210,80 @@ void GameEngine::sMovement()
 {
     // player movement
     auto& p = player();
-    auto& pVel = p->get<CTransform>().velocity;
-    auto& pPos = p->get<CTransform>().position;
+    if ( p->has<CTransform>() && p->has<CInput>() && p->has<CCollision>())
+    {
+        auto& pVel = p->get<CTransform>().velocity;
+        auto& pPos = p->get<CTransform>().position;
 
-    // setting y direction
-    if ( (p->get<CInput>().up) && ((pPos.y - p->get<CCollision>().radius) >= 0))
-    {
-        pVel.y = (-1);
-    }
-    else if ( p->get<CInput>().down && ((pPos.y + p->get<CCollision>().radius) <= m_window.getSize().y))
-    {
-        pVel.y = 1;
-    }
-    else if (!p->get<CInput>().up)
-    {
-        pVel.y = 0;
-    }
-    else if (!p->get<CInput>().down)
-    {
-        pVel.y = 0;
-    }
+        // setting y direction
+        if ( (p->get<CInput>().up) && ((pPos.y - p->get<CCollision>().radius) >= 0))
+        {
+            pVel.y = (-1);
+        }
+        else if ( p->get<CInput>().down && ((pPos.y + p->get<CCollision>().radius) <= m_window.getSize().y))
+        {
+            pVel.y = 1;
+        }
+        else if (!p->get<CInput>().up)
+        {
+            pVel.y = 0;
+        }
+        else if (!p->get<CInput>().down)
+        {
+            pVel.y = 0;
+        }
 
-    // setting x direction
-    if ( p->get<CInput>().left && ((pPos.x - p->get<CCollision>().radius) >= 0))
-    {
-        pVel.x = (-1);
-    }
-    else if ( p->get<CInput>().right && ((pPos.x + p->get<CCollision>().radius) <= m_window.getSize().x))
-    {
-        pVel.x = 1;
-    }
-    else if (!p->get<CInput>().left)
-    {
-        pVel.x = 0;
-    }
-    else if (!p->get<CInput>().right)
-    {
-        pVel.x = 0;
-    }
+        // setting x direction
+        if ( p->get<CInput>().left && ((pPos.x - p->get<CCollision>().radius) >= 0))
+        {
+            pVel.x = (-1);
+        }
+        else if ( p->get<CInput>().right && ((pPos.x + p->get<CCollision>().radius) <= m_window.getSize().x))
+        {
+            pVel.x = 1;
+        }
+        else if (!p->get<CInput>().left)
+        {
+            pVel.x = 0;
+        }
+        else if (!p->get<CInput>().right)
+        {
+            pVel.x = 0;
+        }
 
-    // calculate the next position
-    pPos += (pVel.normalize() * m_playerConfig.speed);
-    
+        // calculate the next position
+        pPos += (pVel.normalize() * m_playerConfig.speed);
+    }    
 
     // enemy movement
+    for (auto& e: m_entityManager.getEntities("enemy"))
+    {
+        if ( e-> has<CTransform>() && e->has<CCollision>())
+        {
+            auto& ePos = e->get<CTransform>().position;
+            auto& eVel = e->get<CTransform>().velocity;
+            auto& eColR = e->get<CCollision>().radius;
+            if (ePos.x - eColR <= 0)
+            {
+                eVel.x = -(eVel.x);
+            }
+            if (ePos.x + eColR >= m_window.getSize().x)
+            {
+                eVel.x = -(eVel.x);
+            }
+            if (ePos.y - eColR <= 0)
+            {
+                eVel.y = -(eVel.y);
+            }
+            if (ePos.y + eColR >= m_window.getSize().y)
+            {
+                eVel.y = -(eVel.y);
+            }
+
+            // calculate new position
+            ePos += eVel;
+        }
+    }
 
     // bullet movement
 
