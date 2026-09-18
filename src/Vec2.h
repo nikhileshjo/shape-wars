@@ -27,5 +27,5 @@ class vec2
         void    operator*= (float scalar);
         float   mag() const;
         vec2    normalize() const;
-
+        vec2    normalizedAngleVec(double deg) const;
 };

@@ -72,3 +72,10 @@ vec2 vec2::normalize() const
 
     return vec2(res_x, res_y);
 }
+
+vec2 vec2::normalizedAngleVec(double deg) const
+{
+    double angleRad = (deg * M_PI) / 180.0;
+    vec2 result = vec2(cos(angleRad), sin(angleRad));
+    return result;
+}

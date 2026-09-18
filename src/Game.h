@@ -38,10 +38,10 @@ struct EnemyConfig  {
                             outerThickness,
                             minVertices,
                             maxVertices,
-                            smallLifeSpan,
                             spawnInterval;
                       float minSpeed,
-                            maxSpeed;
+                            maxSpeed,
+                            smallLifeSpan;
                     };
 struct BulletConfig { 
                       int   shapeRadius,
@@ -53,9 +53,9 @@ struct BulletConfig {
                             outerGreen,
                             outerBlue,
                             outerThickness,
-                            vertices,
+                            vertices;
+                      float speed,
                             lifeSpan;
-                      float speed;
                     };
 struct WindowConfig { unsigned width,
                                height,
@@ -98,6 +98,8 @@ class GameEngine
         bool                    m_paused = false;
         int                     m_scorePerVertex = 100;
         float                   m_entityRotationRate = 3;
+        float                   m_smallEnemyScale = 0.5f;
+        float                   m_smallEnemySpeed = 1;
 
     public:
         GameEngine(){}

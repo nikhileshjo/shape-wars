@@ -278,9 +278,9 @@ void GameEngine::sMovement()
     }    
 
     // enemy movement
-    for (auto& e: m_entityManager.getEntities("enemy"))
+    for (auto& e: m_entityManager.getEntities())
     {
-        if ( e-> has<CTransform>() && e->has<CCollision>())
+        if ( e-> has<CTransform>() && e->has<CCollision>() && (e->getTag() == "small-enemy" || e->getTag() == "enemy"))
         {
             auto& ePos = e->get<CTransform>().position;
             auto& eVel = e->get<CTransform>().velocity;
@@ -418,9 +418,9 @@ void GameEngine::sCollision()
     {
         auto& pPos = p->get<CTransform>().position;
 
-        for (auto& e : m_entityManager.getEntities("enemy"))
+        for (auto& e : m_entityManager.getEntities())
         {
-            if (e->has<CCollision>() && e->has<CTransform>())
+            if (e->has<CCollision>() && e->has<CTransform>() && (e->getTag() == "small-enemy" || e->getTag() == "enemy"))
             {
                 auto& ePos = e->get<CTransform>().position;
                 float pToEDistSq = std::pow((ePos.x - pPos.x), 2) + std::pow((ePos.y - pPos.y), 2);
@@ -435,9 +435,9 @@ void GameEngine::sCollision()
     }
 
     // enemy-bullet collision
-    for (auto& e : m_entityManager.getEntities("enemy"))
+    for (auto& e : m_entityManager.getEntities())
     {
-        if (e->has<CCollision>() && e->has<CTransform>())
+        if (e->has<CCollision>() && e->has<CTransform>() && (e->getTag() == "enemy" || e->getTag() == "small-enemy"))
         {
             auto& ePos = e->get<CTransform>().position;
             for (auto& b : m_entityManager.getEntities("bullet"))
@@ -448,7 +448,10 @@ void GameEngine::sCollision()
                     float bToEDistSq = std::pow((ePos.x - bPos.x), 2) + std::pow((ePos.y - bPos.y), 2);
                     if ( bToEDistSq <= std::pow(b->get<CCollision>().radius + e->get<CCollision>().radius, 2) )
                     {
-                        // spawn small enemies
+                        if (e->getTag() == "enemy")
+                        {
+                            spawnSmallEnemies(e);
+                        }
                         m_score += e->get<CScore>().score;
                         e->destroy();
                         b->destroy();
@@ -467,6 +470,18 @@ void GameEngine::sRender()
         auto& ePos = e->get<CTransform>().position;
         e->get<CShape>().shape.setPosition({ePos.x, ePos.y});
         e->get<CShape>().shape.rotate(sf::degrees(m_entityRotationRate));
+        if ( e->has<CLifeSpan>() )
+        {
+            float lifeSpanRatio = e->get<CLifeSpan>().remaining / e->get<CLifeSpan>().lifeSpan;
+
+            sf::Color fillColor = e->get<CShape>().shape.getFillColor();
+            fillColor.a = (lifeSpanRatio) * 255;
+            e->get<CShape>().shape.setFillColor(fillColor);
+
+            sf::Color outerColor = e->get<CShape>().shape.getOutlineColor();
+            outerColor.a = (lifeSpanRatio) * 255;
+            e->get<CShape>().shape.setOutlineColor(outerColor);
+        }
         m_window.draw(e->get<CShape>().shape);
     }
 
@@ -533,6 +548,53 @@ void GameEngine::sLifeSpan()
         }
     }
     return;
+}
+
+void GameEngine::spawnSmallEnemies(std::shared_ptr<Entity> entity)
+{
+    if ( entity->has<CShape>() && entity->has<CTransform>())
+    {
+        int vertexCnt = entity->get<CShape>().shape.getPointCount();
+        float radius = entity->get<CShape>().shape.getRadius() * m_smallEnemyScale;
+        auto position = entity->get<CTransform>().position;
+        auto fillColor = entity->get<CShape>().shape.getFillColor();
+
+        // setup small enemies
+        for (int i = 0; i < vertexCnt; i++)
+        {
+            auto e = m_entityManager.addEntity("small-enemy");
+            e->add<CTransform>();
+            e->add<CShape>();
+            e->add<CCollision>();
+            e->add<CScore>();
+            e->add<CLifeSpan>();
+
+            // set shape
+            e->get<CShape>().shape.setPointCount(vertexCnt);
+            e->get<CShape>().shape.setRadius(radius);
+            e->get<CShape>().shape.setOrigin(e->get<CShape>().shape.getGeometricCenter());
+            e->get<CShape>().shape.setFillColor(fillColor);
+            e->get<CShape>().shape.setOutlineColor(sf::Color(m_enemyConfig.outerRed, m_enemyConfig.outerGreen, m_enemyConfig.outerBlue));
+            e->get<CShape>().shape.setOutlineThickness(m_enemyConfig.outerThickness);
+
+            // set collision radius
+            e->get<CCollision>().radius = m_enemyConfig.collisionRadius * m_smallEnemyScale;
+
+            // set intial transform
+            e->get<CTransform>().position = position;
+            e->get<CTransform>().velocity = (vec2().normalizedAngleVec((360 / vertexCnt) * i)) * m_smallEnemySpeed;
+
+            // set score
+            e->get<CScore>().score = m_scorePerVertex * vertexCnt * 2;
+
+            // set lifespan
+            e->get<CLifeSpan>().remaining = m_windowConfig.frameLimit * m_enemyConfig.smallLifeSpan;
+            e->get<CLifeSpan>().lifeSpan = m_windowConfig.frameLimit * m_enemyConfig.smallLifeSpan;
+
+            e = nullptr;
+        }
+
+    }
 }
 
 void GameEngine::run()
