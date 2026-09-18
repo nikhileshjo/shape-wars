@@ -112,6 +112,14 @@ void GameEngine::init(std::string configFile)
 
 void GameEngine::spawnPlayer()
 {
+    // reset postion if player already exists
+    if (m_entityManager.getEntities("player").size())
+    {
+        player()->get<CTransform>().position = {m_window.getSize().x/2, m_window.getSize().y/2};
+        return;
+    }
+
+    // create player if no player exists
     auto p = m_entityManager.addEntity("player");
     p->add<CInput>();
     p->add<CTransform>();
