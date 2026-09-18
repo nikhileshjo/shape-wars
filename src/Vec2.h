@@ -18,12 +18,12 @@ class vec2
         {}
         
         // functions
-        void    print();
-        vec2    operator+ (vec2 v);
+        void    print() const;
+        vec2    operator+ (vec2 v) const;
         void    operator+= (vec2 v);
-        vec2    operator- (vec2 v);
+        vec2    operator- (vec2 v) const;
         void    operator-= (vec2 v);
-        vec2    operator* (float scalar);
+        vec2    operator* (float scalar) const;
         void    operator*= (float scalar);
         float   mag() const;
         vec2    normalize() const;

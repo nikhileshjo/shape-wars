@@ -210,8 +210,20 @@ void GameEngine::sUserInput()
                     p->get<CInput>().right = false;
                 }
             }
+
+            // mouse press
+            if (const auto* mousePress = event->getIf<sf::Event::MouseButtonPressed>())
+            {
+                auto mouseKey = int(mousePress->button);
+                if (mouseKey == 0)
+                {
+                    spawnBullet(player(), vec2(mousePress->position.x, mousePress->position.y));
+                }
+                // if mouseKey == 1 // this is right button
+                // implement special ability
+            }
+
         }
-        // implement mouse press
     }
     return;
 }
@@ -414,10 +426,33 @@ void GameEngine::sCollision()
                 float pToEDistSq = std::pow((ePos.x - pPos.x), 2) + std::pow((ePos.y - pPos.y), 2);
                 if ( pToEDistSq <= std::pow(p->get<CCollision>().radius + e->get<CCollision>().radius, 2) )
                 {
-                    // spawn small enemies
                     e->destroy();
                     m_score = 0;
                     spawnPlayer();
+                }
+            }
+        }
+    }
+
+    // enemy-bullet collision
+    for (auto& e : m_entityManager.getEntities("enemy"))
+    {
+        if (e->has<CCollision>() && e->has<CTransform>())
+        {
+            auto& ePos = e->get<CTransform>().position;
+            for (auto& b : m_entityManager.getEntities("bullet"))
+            {
+                if (b->has<CCollision>() && b->has<CTransform>())
+                {
+                    auto& bPos = b->get<CTransform>().position;
+                    float bToEDistSq = std::pow((ePos.x - bPos.x), 2) + std::pow((ePos.y - bPos.y), 2);
+                    if ( bToEDistSq <= std::pow(b->get<CCollision>().radius + e->get<CCollision>().radius, 2) )
+                    {
+                        // spawn small enemies
+                        m_score += e->get<CScore>().score;
+                        e->destroy();
+                        b->destroy();
+                    }
                 }
             }
         }
@@ -462,7 +497,8 @@ void GameEngine::spawnBullet(std::shared_ptr<Entity> entity, const vec2& mousePo
         b->get<CTransform>().position = entity->get<CTransform>().position;
 
         // set bullet velocity
-        b->get<CTransform>().velocity = (mousePos.normalize() * m_bulletConfig.speed);
+        auto bulletToMouse = mousePos - entity->get<CTransform>().position;
+        b->get<CTransform>().velocity = ((bulletToMouse).normalize() * m_bulletConfig.speed);
 
         // set shape
         b->get<CShape>().shape.setRadius(m_bulletConfig.shapeRadius);
@@ -522,7 +558,7 @@ void GameEngine::run()
         sMovement();
         sEnemySpawner();
         sCollision();
-        spawnBullet(player(), vec2(340, 260));
+        // spawnBullet(player(), vec2(340, 260));
         // ImGui::SFML::Init(m_window);
         // // sDebugger();
         // ImGui::SFML::Shutdown();

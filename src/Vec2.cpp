@@ -2,13 +2,13 @@
 
 
 // function definitions
-void vec2::print()
+void vec2::print() const
 {
     std::cout << x << "i + " << y << "j" <<std::endl;
     return;
 }
 
-vec2 vec2::operator+(vec2 v)
+vec2 vec2::operator+(vec2 v) const
 {
     float res_x = x + v.x;
     float res_y = y + v.y;
@@ -24,7 +24,7 @@ void vec2::operator+=(vec2 v)
     return;
 }
 
-vec2 vec2::operator-(vec2 v)
+vec2 vec2::operator-(vec2 v) const
 {
     float res_x = x - v.x;
     float res_y = y - v.y;
@@ -39,7 +39,7 @@ void vec2::operator-=(vec2 v)
     return;
 }
 
-vec2 vec2::operator* (float scalar)
+vec2 vec2::operator* (float scalar) const
 {
     float res_x = x * scalar;
     float res_y = y * scalar;
