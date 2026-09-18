@@ -272,6 +272,7 @@ void GameEngine::spawnEnemy()
     e->add<CTransform>();
     e->add<CShape>();
     e->add<CCollision>();
+    e->add<CScore>();
 
     // set shape
     int vertices = (rand() % ((m_enemyConfig.maxVertices - m_enemyConfig.minVertices) + 1)) + m_enemyConfig.minVertices;
@@ -289,7 +290,7 @@ void GameEngine::spawnEnemy()
     // set collision radius
     e->get<CCollision>().radius = m_enemyConfig.collisionRadius;
     
-    // set intial trasnform
+    // set intial transform
     int minX = m_enemyConfig.collisionRadius + 1;
     int maxX = m_window.getSize().x - m_enemyConfig.collisionRadius - 1;
     float posX = (rand() % (maxX - minX)) + minX;
@@ -300,6 +301,9 @@ void GameEngine::spawnEnemy()
     e->get<CTransform>().position = {posX, posY};
     e->get<CTransform>().velocity = {rand() , rand()};
     e->get<CTransform>().velocity = e->get<CTransform>().velocity.normalize() * speed;
+
+    // set score
+    e->get<CScore>().score = m_scorePerVertex * vertices;
 
 
     e = nullptr;
