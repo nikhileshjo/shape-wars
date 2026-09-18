@@ -509,14 +509,30 @@ void GameEngine::spawnBullet(std::shared_ptr<Entity> entity, const vec2& mousePo
         b->get<CShape>().shape.setOrigin(b->get<CShape>().shape.getGeometricCenter());
 
         // set life span
-        b->get<CLifeSpan>().lifeSpan = m_bulletConfig.lifeSpan;
-        b->get<CLifeSpan>().remaining = m_bulletConfig.lifeSpan;
+        b->get<CLifeSpan>().lifeSpan = (m_bulletConfig.lifeSpan * m_windowConfig.frameLimit);
+        b->get<CLifeSpan>().remaining = (m_bulletConfig.lifeSpan * m_windowConfig.frameLimit);
 
         // set collision radius
         b->get<CCollision>().radius = m_bulletConfig.collisionRadius;
 
         b = nullptr;
     }
+}
+
+void GameEngine::sLifeSpan()
+{
+    for (auto& e : m_entityManager.getEntities())
+    {
+        if (e->has<CLifeSpan>())
+        {
+            e->get<CLifeSpan>().remaining--;
+            if (e->get<CLifeSpan>().remaining <= 0)
+            {
+                e->destroy();
+            }
+        }
+    }
+    return;
 }
 
 void GameEngine::run()
@@ -558,6 +574,7 @@ void GameEngine::run()
         sMovement();
         sEnemySpawner();
         sCollision();
+        sLifeSpan();
         // spawnBullet(player(), vec2(340, 260));
         // ImGui::SFML::Init(m_window);
         // // sDebugger();
