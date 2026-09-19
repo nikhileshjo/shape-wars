@@ -275,6 +275,7 @@ void GameEngine::sMovement()
 
         // calculate the next position
         pPos += (pVel.normalize() * m_playerConfig.speed);
+        p->get<CTransform>().angle += m_entityRotationRate;
     }    
 
     // enemy movement
@@ -304,6 +305,7 @@ void GameEngine::sMovement()
 
             // calculate new position
             ePos += eVel;
+            e->get<CTransform>().angle += m_entityRotationRate;
         }
     }
 
@@ -467,9 +469,9 @@ void GameEngine::sRender()
     m_window.clear();
     for (auto& e : m_entityManager.getEntities())
     {
-        auto& ePos = e->get<CTransform>().position;
-        e->get<CShape>().shape.setPosition({ePos.x, ePos.y});
-        e->get<CShape>().shape.rotate(sf::degrees(m_entityRotationRate));
+        auto& eTran = e->get<CTransform>();
+        e->get<CShape>().shape.setPosition({eTran.position.x, eTran.position.y});
+        e->get<CShape>().shape.setRotation(sf::degrees(eTran.angle));
         if ( e->has<CLifeSpan>() )
         {
             float lifeSpanRatio = e->get<CLifeSpan>().remaining / e->get<CLifeSpan>().lifeSpan;
