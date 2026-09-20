@@ -16,7 +16,7 @@ All enities support the below components. Please note that these componetes just
 Entiy uses a tuple to hold all components, that's why all the components take space even when you don't use them.
 The entity class makes use of get and set functions for book keeping of the entity and you can use add, remove, has and more functions to manipulate components.
 # Using Entity class
-Components by themselves are useless, that's way, we only need to know how to use entities.
+Components by themselves are useless, as they store related data and not have any functionality, that's way, we only need to know how to use entities.
 ```
 Entity e; // declaration
 e.add<CTransform>; // add a component to the entity
