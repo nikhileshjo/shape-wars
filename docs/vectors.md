@@ -31,6 +31,11 @@ vec2 myUnitVec = v3.normalize();
 
 // printing vectors
 v3.printVec();
+
+// create a normalized vector using angle in degrees as an input
+vec2 vAngle;
+vAngle.normalizedAngleVec(60);  // produce a unit vector at 60 degrees
+vAngle.normalizedAngleVec(200); // produce a unit vector at 200 degrees
 ```
 Printing a vector produces outputs like this: `5i + 6j` following regular math conventions of vector representations.\
 NOTE: Normalising a vector involves division by the vector's magnitude, so mathematically speaking, it is undefined, but here, it returns a vector `0i + 0j` because it fits our requrement of not doing anything to when we see a 0 magnitude vector, example if the velocity vector of an enity is 0, it means we don't move it.
