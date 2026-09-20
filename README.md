@@ -17,3 +17,4 @@ cmake ../
 cmake --build .
 ```
 if everything goes smoothly, your build will complete successfully. Once that's done, run the executable from root folder: `./build/src/start_game`
+Here a screenshot of the current game: ![demo](/readme_media/snap-shot.png)
