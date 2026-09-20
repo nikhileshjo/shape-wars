@@ -100,6 +100,10 @@ class GameEngine
         float                   m_entityRotationRate = 3;
         float                   m_smallEnemyScale = 0.5f;
         float                   m_smallEnemySpeed = 1;
+        bool                    m_movementFlag = true;
+        bool                    m_lifeSpanFlag = true;
+        bool                    m_collisionFlag = true;
+        bool                    m_spawnFlag = true;
 
     public:
         GameEngine(){}
@@ -119,12 +123,6 @@ class GameEngine
         void                    spawnSmallEnemies(std::shared_ptr<Entity> entity);
         void                    spawnBullet(std::shared_ptr<Entity> entity, const vec2& mousePos);
         void                    spawnSpecialWeapon(std::shared_ptr<Entity> entity);
-
         std::shared_ptr<Entity>&player();
-
-        void                    sEnemyMovement();
-        void                    sBullet();
-        void                    sPlayerEnemyCollision();
-        void                    sBulletEnemyCollision();
         void                    run();
 };

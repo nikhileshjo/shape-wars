@@ -161,6 +161,11 @@ void GameEngine::sUserInput()
 {
     while (auto event = m_window.pollEvent())
     {
+        // pass events to imgui
+        if (m_windowConfig.activateDebugger)
+        {
+            ImGui::SFML::ProcessEvent(m_window, *event);
+        }
         // check for window closing
         if (event ->is<sf::Event::Closed>())
         {
@@ -409,14 +414,126 @@ std::shared_ptr<Entity>& GameEngine::player()
 
 void GameEngine::sDebugger()
 {
-    while (auto event = m_window.pollEvent())
-    {
-        ImGui::SFML::ProcessEvent(m_window, *event);
-    }
     ImGui::SFML::Update(m_window, m_deltaClock.restart());
-    // ImGui::ShowDemoWindow();
-    ImGui::Begin("Hello, world!");
-    ImGui::Button("Look at this pretty button");
+    ImGui::Begin("Shape Wars");
+    if (ImGui::BeginTabBar("", true))
+    {
+        if (ImGui::BeginTabItem("Systems"))
+        {
+            ImGui::Checkbox("Movement", &m_movementFlag);
+            ImGui::Checkbox("Life Span", &m_lifeSpanFlag);
+            ImGui::Checkbox("Collision", &m_collisionFlag);
+            ImGui::Checkbox("Spawning", &m_spawnFlag);
+
+            int sMin = 1, sMax = 60;
+            ImGui::SliderInt("Spawn Interval", &m_enemyConfig.spawnInterval, sMin, sMax, "interval = %d sec");
+
+            if (ImGui::Button("Spawn"))
+            {
+                spawnEnemy();
+            }
+
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Entity Manager"))
+        {
+            if (ImGui::TreeNode("Entity by tag"))
+            {
+                if (ImGui::TreeNode("Player"))
+                {
+                    auto playerPos = player()->get<CTransform>().position;
+                    ImGui::Text("%d    Player    (%.0f,%.0f)", player()->getId(), playerPos.x, playerPos.y);
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("Bullet"))
+                {
+                    for (auto& b : m_entityManager.getEntities("bullet"))
+                    {
+                        // int bId = b->getId();
+                        // ImGui::PushID(bId);
+                        // ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.6f, 0.6f, 0.6f));
+                        std::string buttonText = "Del##" + std::to_string(b->getId());
+                        if (ImGui::SmallButton(buttonText.c_str()))
+                        {
+                            b->destroy();
+                        }
+                        auto bulletPos = b->get<CTransform>().position;
+                        ImGui::SameLine();
+                        ImGui::Text("%d    Bullet    (%.0f,%.0f)", b->getId(), bulletPos.x, bulletPos.y);
+                        // ImGui::PopStyleColor(3);
+                        // ImGui::PopID();
+                    }
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("Enemy"))
+                {
+                    for (auto& e : m_entityManager.getEntities("enemy"))
+                    {
+                        // int bId = b->getId();
+                        // ImGui::PushID(bId);
+                        // ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.6f, 0.6f, 0.6f));
+                        std::string buttonText = "Del##" + std::to_string(e->getId());
+                        if (ImGui::SmallButton(buttonText.c_str()))
+                        {
+                            e->destroy();
+                        }
+                        auto enemyPos = e->get<CTransform>().position;
+                        ImGui::SameLine();
+                        ImGui::Text("%d    Enemy    (%.0f,%.0f)", e->getId(), enemyPos.x, enemyPos.y);
+                        // ImGui::PopStyleColor(3);
+                        // ImGui::PopID();
+                    }
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("Small Enemy"))
+                {
+                    for (auto& e : m_entityManager.getEntities("small-enemy"))
+                    {
+                        // int bId = b->getId();
+                        // ImGui::PushID(bId);
+                        // ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.6f, 0.6f, 0.6f));
+                        std::string buttonText = "Del##" + std::to_string(e->getId());
+                        if (ImGui::SmallButton(buttonText.c_str()))
+                        {
+                            e->destroy();
+                        }
+                        auto enemyPos = e->get<CTransform>().position;
+                        ImGui::SameLine();
+                        ImGui::Text("%d    Small Enemy    (%.0f,%.0f)", e->getId(), enemyPos.x, enemyPos.y);
+                        // ImGui::PopStyleColor(3);
+                        // ImGui::PopID();
+                    }
+                    ImGui::TreePop();
+                }
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNode("All Entities"))
+            {
+                for (auto& e : m_entityManager.getEntities())
+                    {
+                        // int bId = b->getId();
+                        // ImGui::PushID(bId);
+                        // ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.6f, 0.6f, 0.6f));
+                        std::string buttonText = "Del##" + std::to_string(e->getId()) ;
+                        if (e->getTag() != "player")
+                        {
+                            if (ImGui::SmallButton(buttonText.c_str()))
+                            {
+                                e->destroy();
+                            }
+                            ImGui::SameLine();
+                        }
+                        auto entityPos = e->get<CTransform>().position;
+                        ImGui::Text("%d    %s    (%.0f,%.0f)", e->getId(), e->getTag().c_str(), entityPos.x, entityPos.y);
+                        // ImGui::PopStyleColor(3);
+                        // ImGui::PopID();
+                    }
+                ImGui::TreePop();
+            }
+            ImGui::EndTabItem();
+        }
+        ImGui::EndTabBar();
+    }
     ImGui::End();
 }
 
@@ -620,10 +737,22 @@ void GameEngine::run()
     {
         m_entityManager.update();
         sUserInput();
-        sMovement();
-        sEnemySpawner();
-        sCollision();
-        sLifeSpan();
+        if (m_movementFlag)
+        {
+            sMovement();
+        }
+        if (m_spawnFlag)
+        {
+            sEnemySpawner();
+        }
+        if (m_collisionFlag)
+        {
+            sCollision();
+        }
+        if (m_lifeSpanFlag)
+        {
+            sLifeSpan();
+        }
         if (m_windowConfig.activateDebugger)
         {
             sDebugger();

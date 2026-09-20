@@ -60,4 +60,6 @@ while(m_event)
 ```
 Why? Because I thought the assignment in the `sUserInput()` was doing the job and had declared a member variable to pass them to both the functions. But later realized that they can independently take their own events and didn't need a common member variables to pass values between them.
 * There is one issue though, if you click on the imgui window, it registers as an input to the player too. [Check for a fix].
-* 
+* We only need `ImGui::SFML` when we need to pass something from SFML to ImGui, otherwise all our Imgui APIs are valid. Example, passing the window object. But, creating a tab we use the usual `ImGui::BeginTabBar()`.
+* pass event to imgui in the `sUserInput()` funtion and not in `sDebugger()`, because it can cause issues in responding as there might be delays in responding.
+* if you have a std::string type and you want it to be a char pointer/array, use c_str(), example: `myStr.c_str()`

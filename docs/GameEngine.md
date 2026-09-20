@@ -102,7 +102,7 @@ This function also sets up some basic things for the game to run smoothly:
 * This is a helper function, the syntax to get the player is pretty long it's the same entity everytimes, so we write a function for it fore easier access.
 
 # sDebugger()
-
+* This debugger allows you to manipulate the game to check for edge cases that you might see when you play the game.
 
 # sCollision()
 * There are 2 kinds of collisions **enemy-player collision** and **enemy-bullet collision**.
