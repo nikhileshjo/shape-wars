@@ -78,6 +78,22 @@ struct KeybindsConfig {
                              pause = 'p';
                       };
 
+struct SpecialBulletConfig { 
+                      int   shapeRadius,
+                            collisionRadius,
+                            fillRed,
+                            fillGreen,
+                            fillBlue,
+                            outerRed,
+                            outerGreen,
+                            outerBlue,
+                            outerThickness,
+                            vertices,
+                            bulletCnt,
+                            coolDownPts;
+                      float speed;
+                    };
+
 
 class GameEngine
 {
@@ -90,6 +106,7 @@ class GameEngine
         BulletConfig            m_bulletConfig;
         WindowConfig            m_windowConfig;
         KeybindsConfig          m_keybindConfig;
+        SpecialBulletConfig     m_specialBulletConfig;
         TextConfig              m_textConfig;
         sf::Clock               m_deltaClock;
         int                     m_score = 0;
@@ -122,7 +139,9 @@ class GameEngine
         void                    spawnEnemy();
         void                    spawnSmallEnemies(std::shared_ptr<Entity> entity);
         void                    spawnBullet(std::shared_ptr<Entity> entity, const vec2& mousePos);
-        void                    spawnSpecialWeapon(std::shared_ptr<Entity> entity);
+        void                    spawnSpecialWeapon();
         std::shared_ptr<Entity>&player();
+        void                    spawnSpecialBullets(std::shared_ptr<Entity> entity);
+        void                    sSpecialAbilityBar();
         void                    run();
 };

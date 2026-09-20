@@ -58,6 +58,18 @@ Keybinds UP LEFT DOWN RIGHT PAUSE
 * WASD are defaults
 * P for pause
 
+### Special ability
+Special SR CR S FR FG FB OR OG OB OT V BC T
+* SR = Shape radius
+* CR = Collision Radius
+* S = Bullet Speed
+* FR FG FB = Fill color in RGB
+* OR OG OB = Outer/boundry color in RGB
+* OT = Outline thickness
+* V = shape vertices
+* BC = Bullet count in special ability
+* T = Special ability score threshold
+
 This function also sets up some basic things for the game to run smoothly:
 * Setting up text, this configures SFML text according to the text file provided to the program. `std::optional<sf::Text>` is used to declare `m_text` as a member variable because `sf::Text` doesn't have a default constructor, so all it's uses are like pointers.
 * Set up the sfml renderer as `m_window` which is accessible through out the script.
@@ -131,6 +143,14 @@ This function also sets up some basic things for the game to run smoothly:
 * Their count is set by the number of corners the bigger enemy has
 * they are positioned at the same location as the enemy.
 * Their velocity direction is set by the 360/number of corners. Then we calculate the unit vector pointing to a certain direction then multiply by a fixed speed.
+
+# Special ability
+* This allows the player to shoot multiple bullets radially. These are special bullets that lose life only on bouncing off the screen boundry. As you keep using the special ability, the bounce count increases, the first time, it doesn't bounce, the second time it bounces once, then twice and so on.
+* We create a new kind of bullet for this, where the collision is handled differently from other bullets, the life span is different and the movement is different too.
+* Movement is the same as enemy movement.
+* Collision behaves differently, when these bullets collide with the enemy, only the enemy dies, not the bullet unlike a regular bullet.
+* This doesn't have the usual time based life span, but a bounce based life span.
+* The special ablility is activated only when you have crossed a threshold of score that needs  to be scored.
 
 # run()
 * run is a wrapper around all the functions, it ensures that every thing is triggered in the right order.

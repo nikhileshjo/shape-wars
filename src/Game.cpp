@@ -77,6 +77,22 @@ void GameEngine::init(std::string configFile)
                 >> m_keybindConfig.right
                 >> m_keybindConfig.pause;
         }
+        else if (tmp == "Special")
+        {
+            fin >> m_specialBulletConfig.shapeRadius
+                >> m_specialBulletConfig.collisionRadius
+                >> m_specialBulletConfig.speed
+                >> m_specialBulletConfig.fillRed
+                >> m_specialBulletConfig.fillGreen
+                >> m_specialBulletConfig.fillBlue
+                >> m_specialBulletConfig.outerRed
+                >> m_specialBulletConfig.outerGreen
+                >> m_specialBulletConfig.outerBlue
+                >> m_specialBulletConfig.outerThickness
+                >> m_specialBulletConfig.vertices
+                >> m_specialBulletConfig.bulletCnt
+                >> m_specialBulletConfig.coolDownPts;
+        }
         else
         {
             std::cout << "Unidentified values in config file" << std::endl;
@@ -135,6 +151,7 @@ void GameEngine::spawnPlayer()
     p->add<CTransform>();
     p->add<CShape>();
     p->add<CCollision>();
+    p->add<CSpecialAbility>();
 
     // set shape
     p->get<CShape>().shape.setPointCount(m_playerConfig.vertices);
@@ -147,10 +164,17 @@ void GameEngine::spawnPlayer()
     // set collision radius
     p->get<CCollision>().radius = m_playerConfig.collisionRadius;
     
-    // set intial trasnform
+    // set intial transform
     p->get<CTransform>().position = {m_window.getSize().x/2, m_window.getSize().y/2};
     p->get<CTransform>().velocity = {0 , 0};
     p->get<CTransform>().angle = 0;
+
+    // set up special ability
+    p->get<CSpecialAbility>().isActive = false;
+    p->get<CSpecialAbility>().bulletCnt = m_specialBulletConfig.bulletCnt;
+    p->get<CSpecialAbility>().triggerCnt = 0;
+    p->get<CSpecialAbility>().coolDownPts = m_specialBulletConfig.coolDownPts;
+    p->get<CSpecialAbility>().generatedPts = 0;
 
     p = nullptr;
 
@@ -229,6 +253,10 @@ void GameEngine::sUserInput()
                 if (mouseKey == 0)
                 {
                     spawnBullet(player(), vec2(mousePress->position.x, mousePress->position.y));
+                }
+                if (mouseKey == 1)
+                {
+                    spawnSpecialWeapon();
                 }
                 // if mouseKey == 1 // this is right button
                 // implement special ability
@@ -337,6 +365,40 @@ void GameEngine::sMovement()
         if (b->has<CTransform>())
         {
             b->get<CTransform>().position += b->get<CTransform>().velocity;
+        }
+    }
+
+    // special bullet movement
+    for (auto& b: m_entityManager.getEntities("special-bullet"))
+    {
+        if ( b-> has<CTransform>() && b->has<CCollision>() && b->has<CLifeSpan>())
+        {
+            auto& bPos = b->get<CTransform>().position;
+            auto& bVel = b->get<CTransform>().velocity;
+            auto& bColR = b->get<CCollision>().radius;
+            if (bPos.x - bColR <= 0)
+            {
+                b->get<CLifeSpan>().wallTouchCnt--;
+                bVel.x = -(bVel.x);
+            }
+            if (bPos.x + bColR >= m_window.getSize().x)
+            {
+                b->get<CLifeSpan>().wallTouchCnt--;
+                bVel.x = -(bVel.x);
+            }
+            if (bPos.y - bColR <= 0)
+            {
+                b->get<CLifeSpan>().wallTouchCnt--;
+                bVel.y = -(bVel.y);
+            }
+            if (bPos.y + bColR >= m_window.getSize().y)
+            {
+                b->get<CLifeSpan>().wallTouchCnt--;
+                bVel.y = -(bVel.y);
+            }
+
+            // calculate new position
+            bPos += bVel;
         }
     }
 }
@@ -555,6 +617,8 @@ void GameEngine::sCollision()
                 {
                     e->destroy();
                     m_score = 0;
+                    player()->get<CSpecialAbility>().generatedPts = 0;
+                    player()->get<CSpecialAbility>().triggerCnt = 0;
                     spawnPlayer();
                 }
             }
@@ -567,9 +631,9 @@ void GameEngine::sCollision()
         if (e->has<CCollision>() && e->has<CTransform>() && (e->getTag() == "enemy" || e->getTag() == "small-enemy"))
         {
             auto& ePos = e->get<CTransform>().position;
-            for (auto& b : m_entityManager.getEntities("bullet"))
+            for (auto& b : m_entityManager.getEntities())
             {
-                if (b->has<CCollision>() && b->has<CTransform>())
+                if (b->has<CCollision>() && b->has<CTransform>() && (b->getTag() == "bullet" || b->getTag() == "special-bullet"))
                 {
                     auto& bPos = b->get<CTransform>().position;
                     float bToEDistSq = std::pow((ePos.x - bPos.x), 2) + std::pow((ePos.y - bPos.y), 2);
@@ -580,8 +644,12 @@ void GameEngine::sCollision()
                             spawnSmallEnemies(e);
                         }
                         m_score += e->get<CScore>().score;
+                        player()->get<CSpecialAbility>().generatedPts += e->get<CScore>().score;
                         e->destroy();
-                        b->destroy();
+                        if (b->getTag() == "bullet")
+                        {
+                            b->destroy();
+                        }
                     }
                 }
             }
@@ -597,7 +665,7 @@ void GameEngine::sRender()
         auto& eTran = e->get<CTransform>();
         e->get<CShape>().shape.setPosition({eTran.position.x, eTran.position.y});
         e->get<CShape>().shape.setRotation(sf::degrees(eTran.angle));
-        if ( e->has<CLifeSpan>() )
+        if ( e->has<CLifeSpan>() && e->getTag()!= "special-bullet")
         {
             float lifeSpanRatio = e->get<CLifeSpan>().remaining / e->get<CLifeSpan>().lifeSpan;
 
@@ -673,12 +741,28 @@ void GameEngine::sLifeSpan()
     {
         if (e->has<CLifeSpan>())
         {
-            e->get<CLifeSpan>().remaining--;
-            if (e->get<CLifeSpan>().remaining <= 0)
+            if (e->getTag() != "special-bullet")
             {
-                e->destroy();
+                e->get<CLifeSpan>().remaining--;
+                if (e->get<CLifeSpan>().remaining <= 0)
+                {
+                    e->destroy();
+                }
+            }
+            else
+            {
+                if (e->get<CLifeSpan>().wallTouchCnt <= 0)
+                {
+                    e->destroy();
+                }
             }
         }
+    }
+    
+    // Check special ability life span
+    if (m_entityManager.getEntities("special-bullet").size() == 0 )
+    {
+        player()->get<CSpecialAbility>().isActive = false;
     }
     return;
 }
@@ -729,6 +813,63 @@ void GameEngine::spawnSmallEnemies(std::shared_ptr<Entity> entity)
 
     }
 }
+
+void GameEngine::spawnSpecialBullets(std::shared_ptr<Entity> entity)
+{
+    if ( entity->has<CTransform>() )
+    {
+        for (int i = 0; i < entity->get<CSpecialAbility>().bulletCnt ; i++)
+        {
+            auto b = m_entityManager.addEntity("special-bullet");
+
+            //bullet setup
+            b->add<CTransform>();
+            b->add<CShape>();
+            b->add<CCollision>();
+            b->add<CLifeSpan>();
+
+            // set bullet postion
+            b->get<CTransform>().position = entity->get<CTransform>().position;
+
+            // set bullet velocity
+            b->get<CTransform>().velocity = (vec2().normalizedAngleVec((360 / entity->get<CSpecialAbility>().bulletCnt) * i)) * m_bulletConfig.speed;
+
+            // set shape
+            b->get<CShape>().shape.setRadius(m_specialBulletConfig.shapeRadius);
+            b->get<CShape>().shape.setFillColor(sf::Color(m_specialBulletConfig.fillRed, m_specialBulletConfig.fillGreen, m_specialBulletConfig.fillBlue));
+            b->get<CShape>().shape.setOutlineColor(sf::Color(m_specialBulletConfig.outerRed, m_specialBulletConfig.outerGreen, m_specialBulletConfig.outerBlue));
+            b->get<CShape>().shape.setOutlineThickness(m_specialBulletConfig.outerThickness);
+            b->get<CShape>().shape.setPointCount(m_specialBulletConfig.vertices);
+            b->get<CShape>().shape.setOrigin(b->get<CShape>().shape.getGeometricCenter());
+
+            // set life span
+            b->get<CLifeSpan>().wallTouchCnt = entity->get<CSpecialAbility>().triggerCnt;
+
+            // set collision radius
+            b->get<CCollision>().radius = m_specialBulletConfig.collisionRadius;
+
+            b = nullptr;
+        }
+    }
+}
+
+void GameEngine::spawnSpecialWeapon()
+{
+    if (m_entityManager.getEntities("special-bullet").size() || player()->get<CSpecialAbility>().generatedPts < player()->get<CSpecialAbility>().coolDownPts )
+    {
+        return;
+    }
+    
+    player()->get<CSpecialAbility>().triggerCnt++;
+    player()->get<CSpecialAbility>().generatedPts = 0;
+    spawnSpecialBullets(player());
+}
+
+// void GameEngine::sSpecialAbilityBar()
+// {
+//     m_entityManager.addEntity("special-indicator");
+
+// }
 
 void GameEngine::run()
 {

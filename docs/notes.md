@@ -63,3 +63,4 @@ Why? Because I thought the assignment in the `sUserInput()` was doing the job an
 * We only need `ImGui::SFML` when we need to pass something from SFML to ImGui, otherwise all our Imgui APIs are valid. Example, passing the window object. But, creating a tab we use the usual `ImGui::BeginTabBar()`.
 * pass event to imgui in the `sUserInput()` funtion and not in `sDebugger()`, because it can cause issues in responding as there might be delays in responding.
 * if you have a std::string type and you want it to be a char pointer/array, use c_str(), example: `myStr.c_str()`
+* Issue with special bullets: They don't get destroyed when colliding with an enemy like regular bullets do, so, when we spawn small enemies at the center of the larger enemy and if the bullet is going through the center, you'll never see the small enemy spawn, because the bullet kills them as soon as they're spawned, but you will get the points that they carry.

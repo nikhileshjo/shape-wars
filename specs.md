@@ -15,7 +15,7 @@ Constraints on Special Abilities
 * Enitites have some uique graphic associate with tehm
 * A unique game mechanic is introduced via a new componenet
 * A 'cooldown timer' must be implemented for the special wepon.
-The properties for the special weapon are not in the config file (as per the assignment), so you'll have to create those parameters yourself and add them to the config.
+The properties for the special weapon are not in the config file (as per the assignment), so you'll have to create those parameters yourself and add them to the config.\
 
 Jotting down idea for this:
 * All the enimies pause in the place they are.

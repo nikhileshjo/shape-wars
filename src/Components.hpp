@@ -17,7 +17,7 @@ class CTransform : public Components
     public:
         vec2  position;
         vec2  velocity;
-        float angle;    
+        float angle;  
     
         CTransform(){}
 };
@@ -60,6 +60,7 @@ class CLifeSpan : public Components
     public:
         float lifeSpan;
         float remaining;
+        int   wallTouchCnt;
 
         CLifeSpan(){}
         CLifeSpan(float life)
@@ -81,5 +82,11 @@ class CInput : public Components
 class CSpecialAbility : public Components
 {
     public:
+        bool isActive;
+        int  triggerCnt;
+        int  bulletCnt;
+        int  coolDownPts;
+        int  generatedPts;
+
         CSpecialAbility(){}
 };
