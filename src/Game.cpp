@@ -104,10 +104,20 @@ void GameEngine::init(std::string configFile)
     }
     m_window.setFramerateLimit(m_windowConfig.frameLimit);
     m_window.setKeyRepeatEnabled(false);
-    sf::Clock deltaClock;
+    // sf::Clock deltaClock; 
     
     // setup player
     spawnPlayer();
+
+    // initialize debugger
+    if (m_windowConfig.activateDebugger)
+    {
+        ImGui::SFML::Init(m_window);
+
+        // scale the imgui ui and text size by 2
+        ImGui::GetStyle().ScaleAllSizes(2.0f);
+        ImGui::GetIO().FontGlobalScale = 2.0f;
+    }
 }
 
 void GameEngine::spawnPlayer()
@@ -140,6 +150,7 @@ void GameEngine::spawnPlayer()
     // set intial trasnform
     p->get<CTransform>().position = {m_window.getSize().x/2, m_window.getSize().y/2};
     p->get<CTransform>().velocity = {0 , 0};
+    p->get<CTransform>().angle = 0;
 
     p = nullptr;
 
@@ -150,16 +161,14 @@ void GameEngine::sUserInput()
 {
     while (auto event = m_window.pollEvent())
     {
+        // check for window closing
+        if (event ->is<sf::Event::Closed>())
+        {
+            m_window.close();
+        }
         auto& p = player();
         if (p->has<CInput>())
         {
-
-            // check for window closing
-            if (event ->is<sf::Event::Closed>())
-            {
-                m_window.close();
-            }
-
             // check for key press        
             if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
             {
@@ -181,10 +190,7 @@ void GameEngine::sUserInput()
                 {
                     p->get<CInput>().right = true;
                 }
-                if (keyPress == std::tolower(m_keybindConfig.pause) - 'a')
-                {
-                    m_paused = !m_paused;
-                }
+                
                 
                 
             }
@@ -223,6 +229,16 @@ void GameEngine::sUserInput()
                 // implement special ability
             }
 
+        }
+
+        // pause
+        if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
+        {
+            auto keyPress = int(keyPressed->scancode);
+            if (keyPress == std::tolower(m_keybindConfig.pause) - 'a')
+            {
+                m_paused = !m_paused;
+            }
         }
     }
     return;
@@ -355,6 +371,7 @@ void GameEngine::spawnEnemy()
     e->get<CTransform>().position = {posX, posY};
     e->get<CTransform>().velocity = {rand() , rand()};
     e->get<CTransform>().velocity = e->get<CTransform>().velocity.normalize() * speed;
+    e->get<CTransform>().angle = 0;
 
     // set score
     e->get<CScore>().score = m_scorePerVertex * vertices;
@@ -392,24 +409,15 @@ std::shared_ptr<Entity>& GameEngine::player()
 
 void GameEngine::sDebugger()
 {
-    // ImGui::SFML::Init(m_window); // testing
-    // while (const auto event = m_window.pollEvent()) // testing
-    // {
-    //         ImGui::SFML::ProcessEvent(m_window, *event);
-
-    //         if (event->is<sf::Event::Closed>()) {
-    //             m_window.close();
-    //         }
-    // }
+    while (auto event = m_window.pollEvent())
+    {
+        ImGui::SFML::ProcessEvent(m_window, *event);
+    }
     ImGui::SFML::Update(m_window, m_deltaClock.restart());
-
-    ImGui::ShowDemoWindow();
-
+    // ImGui::ShowDemoWindow();
     ImGui::Begin("Hello, world!");
     ImGui::Button("Look at this pretty button");
     ImGui::End();
-    ImGui::SFML::Render(m_window);
-    // ImGui::SFML::Shutdown(); // testing
 }
 
 void GameEngine::sCollision()
@@ -494,7 +502,13 @@ void GameEngine::sRender()
     m_text->setCharacterSize(m_textConfig.size);
     m_window.draw(*m_text);
 
-    // add imgui
+    // render imgui
+    if (m_windowConfig.activateDebugger)
+    {
+        ImGui::SFML::Render(m_window);
+    }
+
+    // display all the renders
     m_window.display();
 }
 
@@ -601,49 +615,23 @@ void GameEngine::spawnSmallEnemies(std::shared_ptr<Entity> entity)
 
 void GameEngine::run()
 {
-    // m_window.create(sf::VideoMode({1280, 740}), "Shape wars", sf::State::Fullscreen);
-    // m_window.setFramerateLimit(60);
-    // m_window.setKeyRepeatEnabled(false);
-
-    // sf::Clock deltaClock;
-    
-    // spawn player
-    
-
+    // start game loop
     while (m_window.isOpen())
     {
         m_entityManager.update();
-        // while (auto event = m_window.pollEvent())
-        // {
-        //     if (event ->is<sf::Event::Closed>())
-        //     {
-        //         std::cout << "Event closed" << std::endl;
-        //         m_window.close();
-        //     }
-            
-        //     // if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
-        //     // {
-        //     //     // print the key that was pressed to the console
-        //     //     auto keyPress = int(keyPressed->scancode);
-        //     //     sPlayerMovement(keyPress, true);
-        //     // }
-        //     // if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>())
-        //     // {
-        //     //     auto keyRelease = int(keyReleased->scancode);
-        //     //     sPlayerMovement(keyRelease, false);
-        //     // }                
-        // }
-
         sUserInput();
         sMovement();
         sEnemySpawner();
         sCollision();
         sLifeSpan();
-        // spawnBullet(player(), vec2(340, 260));
-        // ImGui::SFML::Init(m_window);
-        // // sDebugger();
-        // ImGui::SFML::Shutdown();
+        if (m_windowConfig.activateDebugger)
+        {
+            sDebugger();
+        }
         sRender();
     }
+
+    // ImGui::SFML::Shutdown();
+
     return;
 }
