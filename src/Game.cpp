@@ -855,7 +855,7 @@ void GameEngine::spawnSpecialBullets(std::shared_ptr<Entity> entity)
 
 void GameEngine::spawnSpecialWeapon()
 {
-    if (m_entityManager.getEntities("special-bullet").size() || player()->get<CSpecialAbility>().generatedPts < player()->get<CSpecialAbility>().coolDownPts )
+    if (player()->get<CSpecialAbility>().isActive || player()->get<CSpecialAbility>().generatedPts < player()->get<CSpecialAbility>().coolDownPts )
     {
         return;
     }
@@ -867,7 +867,25 @@ void GameEngine::spawnSpecialWeapon()
 
 // void GameEngine::sSpecialAbilityBar()
 // {
-//     m_entityManager.addEntity("special-indicator");
+//     auto ol = m_entityManager.addEntity("meter-outline");
+//     auto bar = m_entityManager.addEntity("meter");
+
+//     // set up outline
+//     ol->add<CShape>();
+
+//     // Shape set up
+//     ol->get<CShape>().shape.setPointCount(4);
+//     ol->get<CShape>().shape.setOrigin(ol->get<CShape>().shape.getGeometricCenter());
+//     ol->get<CShape>().shape.setRadius()
+
+//     // color
+//     ol->get<CShape>().shape.setFillColor(sf::Color(0,0,0,0));
+
+
+
+//     // set up meter bar
+//     bar->add<CShape>();
+
 
 // }
 
@@ -878,19 +896,19 @@ void GameEngine::run()
     {
         m_entityManager.update();
         sUserInput();
-        if (m_movementFlag)
+        if (m_movementFlag && !m_paused)
         {
             sMovement();
         }
-        if (m_spawnFlag)
+        if (m_spawnFlag && !m_paused)
         {
             sEnemySpawner();
         }
-        if (m_collisionFlag)
+        if (m_collisionFlag && !m_paused)
         {
             sCollision();
         }
-        if (m_lifeSpanFlag)
+        if (m_lifeSpanFlag && !m_paused)
         {
             sLifeSpan();
         }
